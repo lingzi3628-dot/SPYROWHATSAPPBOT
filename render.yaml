@@ -1,0 +1,67 @@
+# Render deployment config — https://render.com/docs/blueprint-spec
+#
+# Deploy via Render Dashboard:
+#   1. New → Blueprint → connect GitHub repo → select SPYROWHATSAPPBOT
+#   2. Render auto-detects this render.yaml
+#   3. Set environment variables in the dashboard (see README §3)
+#   4. Deploy → open the *.onrender.com URL → scan QR or pair with phone
+#
+# OR via Render CLI:
+#   npm i -g @render/cli
+#   render deploy
+
+services:
+  - type: web
+    name: spyro-whatsapp-bot
+    runtime: node
+    plan: free                 # free tier: 512 MB RAM, sleeps after 15 min idle
+    region: ohio               # change to your region: frankfurt / oregon / singapore
+    branch: main
+    rootDir: .
+    # Render runs this command. Our package.json "start" script handles
+    # the --max-old-space-size flag for memory limits.
+    startCommand: npm start
+    # Render auto-runs "npm install" or "npm ci" on deploy
+    buildCommand: npm ci || npm install
+    # Auto-deploy when you push to main
+    autoDeploy: true
+    # Health check — Render pings this endpoint to know if the service is up
+    healthCheckPath: /health
+    # Environment variables — set these in the Render dashboard
+    # (or via `render env set` CLI). Don't commit secrets to git.
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        # Render auto-injects PORT — we don't hardcode it
+        value: "3000"
+      - key: HOST
+        value: 0.0.0.0
+      - key: LOG_PRETTY
+        value: "false"
+      - key: BOT_NAME
+        value: Spyro Bot
+      - key: BOT_PREFIX
+        value: "."
+      - key: OWNER_JID
+        # CHANGE THIS to your number before deploying
+        value: 254798081280@s.whatsapp.net
+      - key: LOG_LEVEL
+        value: info
+      # Optional AI features — uncomment and set key to enable
+      # - key: ENABLE_AI
+      #   value: "true"
+      # - key: OPENAI_API_KEY
+      #   sync: false  # marks as secret in Render dashboard
+    # Persistent disk — keeps WhatsApp session across deploys & restarts
+    # IMPORTANT: persistent disks are a paid feature on Render ($0.25/GB/mo)
+    # Without a disk, you must re-scan the QR after every deploy/restart.
+    disk:
+      name: bot-data
+      mountPath: /app/data
+      sizeGB: 1
+    # Note: Render only allows ONE disk per service. To persist BOTH
+    # auth_info/ and data/, use a single disk at /app and let both
+    # subdirectories live inside it. Edit the mountPath above to /app
+    # if you need this. (Be careful — that would also persist node_modules
+    # which you do NOT want.)

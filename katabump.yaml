@@ -1,0 +1,36 @@
+# Katabump deployment configuration
+# https://dashboard.katabump.com
+#
+# Katabump supports Docker-based deployments. This file documents the
+# required settings. The actual deployment is configured via the Katabump
+# dashboard (or CLI) — point it at this repo and Katabump auto-detects
+# the Dockerfile.
+#
+# ─── Dashboard settings ───────────────────────────────────────────
+# Build type:     Docker (auto-detected from Dockerfile)
+# Port:           3000  (the web UI / health endpoint)
+# Health check:   GET /health
+#
+# ─── Environment variables (set in Katabump dashboard) ───────────
+# Required:
+#   BOT_NAME      = Spyro Bot
+#   BOT_PREFIX    = .
+#   OWNER_JID     = 2547XXXXXXXX@s.whatsapp.net
+#   LOG_LEVEL     = info
+#
+# Optional (for AI features):
+#   ENABLE_AI       = true
+#   OPENAI_API_KEY  = sk-...
+#   OPENAI_MODEL    = gpt-4o-mini
+#
+# ─── Persistent storage ───────────────────────────────────────────
+# Mount two persistent volumes so the session and database survive
+# container restarts (otherwise you must re-scan the QR on every deploy):
+#
+#   /app/auth_info   →  Baileys session credentials
+#   /app/data        →  SQLite database
+#   /app/tmp         →  (optional) temp media files
+#
+# ─── Resources ────────────────────────────────────────────────────
+# Minimum: 512 MB RAM, 0.1 vCPU
+# Recommended: 1 GB RAM, 0.5 vCPU (for media processing with ffmpeg)

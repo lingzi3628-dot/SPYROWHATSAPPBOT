@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Spyro Bot — WhatsApp Bot Platform</title>
+<style>
+  :root {
+    --bg: #0a0e14; --bg-elev: #121822; --card: rgba(20,27,38,0.7);
+    --card-border: rgba(255,255,255,0.06); --text: #e6edf3; --text-dim: #8b949e;
+    --green: #25d366; --green-dim: #1fb855; --red: #f85149; --yellow: #d29922;
+    --blue: #58a6ff; --radius: 16px; --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+    color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse 800px 600px at 20% 0%, rgba(37,211,102,0.08), transparent 60%),
+                radial-gradient(ellipse 600px 400px at 80% 100%, rgba(88,166,255,0.06), transparent 60%);
+    pointer-events: none;
+  }
+  .container { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 24px 20px 48px; }
+  /* Nav */
+  .nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+  .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
+  .nav-logo { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #25d366, #128c7e); display: grid; place-items: center; font-size: 18px; }
+  .nav-name { font-size: 17px; font-weight: 600; }
+  .nav-links { display: flex; gap: 8px; align-items: center; }
+  .nav-link { padding: 8px 14px; color: var(--text-dim); text-decoration: none; font-size: 13px; border-radius: 8px; transition: all 0.2s; }
+  .nav-link:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+  .nav-link.btn { background: var(--green); color: #00150a; font-weight: 600; }
+  .nav-link.btn:hover { background: var(--green-dim); color: #00150a; }
+  /* Cards */
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius); backdrop-filter: blur(20px) saturate(150%); box-shadow: var(--shadow); overflow: hidden; }
+  .card-pad { padding: 28px; }
+  /* Hero */
+  .hero { text-align: center; padding: 40px 20px 30px; }
+  .hero h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px; }
+  .hero h1 span { background: linear-gradient(135deg, var(--green), #58a6ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { font-size: 16px; color: var(--text-dim); max-width: 560px; margin: 0 auto 24px; line-height: 1.6; }
+  .hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn { padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; border: none; font-family: inherit; transition: all 0.2s; }
+  .btn-primary { background: var(--green); color: #00150a; }
+  .btn-primary:hover { background: var(--green-dim); transform: translateY(-1px); }
+  .btn-secondary { background: rgba(255,255,255,0.06); color: var(--text); }
+  .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+  .btn-danger { background: rgba(248,81,73,0.15); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
+  .btn-danger:hover { background: rgba(248,81,73,0.25); }
+  /* Features grid */
+  .features { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 32px; }
+  .feature { padding: 20px; background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; transition: all 0.2s; }
+  .feature:hover { border-color: rgba(37,211,102,0.2); transform: translateY(-2px); }
+  .feature-icon { font-size: 28px; margin-bottom: 10px; }
+  .feature h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .feature p { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+  /* Forms */
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
+  .form-input { width: 100%; padding: 12px 14px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); border-radius: 10px; color: var(--text); font-size: 14px; font-family: inherit; transition: border-color 0.2s; }
+  .form-input:focus { outline: none; border-color: var(--green); }
+  .form-input::placeholder { color: var(--text-dim); }
+  .form-error { padding: 10px 14px; background: rgba(248,81,73,0.08); border: 1px solid rgba(248,81,73,0.2); color: var(--red); border-radius: 10px; font-size: 13px; margin-bottom: 16px; display: none; }
+  .form-error.show { display: block; }
+  .form-success { padding: 10px 14px; background: rgba(37,211,102,0.08); border: 1px solid rgba(37,211,102,0.2); color: var(--green); border-radius: 10px; font-size: 13px; margin-bottom: 16px; display: none; }
+  .form-success.show { display: block; }
+  /* Auth pages */
+  .auth-page { max-width: 400px; margin: 40px auto; }
+  .auth-title { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+  .auth-sub { font-size: 14px; color: var(--text-dim); text-align: center; margin-bottom: 24px; }
+  .auth-switch { text-align: center; margin-top: 20px; font-size: 13px; color: var(--text-dim); }
+  .auth-switch a { color: var(--green); text-decoration: none; }
+  /* Dashboard */
+  .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media (max-width: 600px) { .dash-grid { grid-template-columns: 1fr; } }
+  .stat-card { padding: 16px; background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; }
+  .stat-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .stat-value { font-size: 22px; font-weight: 700; }
+  /* Status badge */
+  .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; }
+  .status-badge.connected { background: rgba(37,211,102,0.12); color: var(--green); }
+  .status-badge.qr_ready, .status-badge.connecting { background: rgba(210,153,34,0.12); color: var(--yellow); }
+  .status-badge.disconnected, .status-badge.logged_out { background: rgba(248,81,73,0.12); color: var(--red); }
+  .status-badge.inactive { background: rgba(139,148,158,0.12); color: var(--text-dim); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .status-badge.connecting .status-dot, .status-badge.qr_ready .status-dot { animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.85)} }
+  /* Pair section */
+  .pair-tabs { display: flex; gap: 4px; padding: 4px; background: rgba(0,0,0,0.25); border-radius: 10px; margin-bottom: 16px; }
+  .pair-tab { flex: 1; padding: 9px; background: transparent; border: none; color: var(--text-dim); font-size: 13px; font-weight: 500; border-radius: 7px; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+  .pair-tab.active { background: rgba(255,255,255,0.06); color: var(--text); }
+  .qr-box { text-align: center; padding: 20px 0; }
+  .qr-box img { width: 240px; height: 240px; border-radius: 12px; background: #fff; padding: 12px; }
+  .pair-code-box { text-align: center; padding: 16px; background: rgba(37,211,102,0.06); border: 1px solid rgba(37,211,102,0.2); border-radius: 12px; margin-top: 12px; }
+  .pair-code { font-family: 'SF Mono', Consolas, monospace; font-size: 28px; font-weight: 700; letter-spacing: 0.15em; color: var(--green); }
+  /* Table */
+  .table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .table th { text-align: left; padding: 10px 14px; color: var(--text-dim); font-weight: 500; border-bottom: 1px solid var(--card-border); }
+  .table td { padding: 10px 14px; border-bottom: 1px solid var(--card-border); }
+  .table tr:hover { background: rgba(255,255,255,0.02); }
+  .role-badge { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+  .role-badge.admin { background: rgba(37,211,102,0.15); color: var(--green); }
+  .role-badge.user { background: rgba(88,166,255,0.15); color: var(--blue); }
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); padding: 12px 20px; background: rgba(20,27,38,0.95); border: 1px solid var(--card-border); border-radius: 10px; font-size: 13px; backdrop-filter: blur(12px); box-shadow: var(--shadow); transition: transform 0.3s; z-index: 100; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: rgba(37,211,102,0.3); }
+  .toast.error { border-color: rgba(248,81,73,0.3); }
+  /* Section title */
+  .section-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .section-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 16px; }
+  .hidden { display: none !important; }
+  .footer { text-align: center; margin-top: 40px; font-size: 12px; color: var(--text-dim); }
+  .footer a { color: var(--text-dim); text-decoration: none; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+<script>
+// ─── SPA Router ──────────────────────────────────────────────────
+const $ = (s) => document.querySelector(s);
+const app = $('#app');
+const toast = $('#toast');
+
+function showToast(msg, type = '') {
+  toast.textContent = msg;
+  toast.className = 'toast show ' + type;
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    headers: { 'Content-Type': 'application/json', ...opts.headers },
+    ...opts,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+// ─── Views ───────────────────────────────────────────────────────
+function nav(user) {
+  if (user) {
+    return `<div class="nav">
+      <a class="nav-brand" href="/dashboard"><div class="nav-logo">🤖</div><div class="nav-name">Spyro Bot</div></a>
+      <div class="nav-links">
+        <a class="nav-link" href="/dashboard">Dashboard</a>
+        <a class="nav-link" href="/train">🧠 Train AI</a>
+        ${user.role === 'admin' ? '<a class="nav-link" href="/admin">Admin</a>' : ''}
+        <a class="nav-link" href="/api/logout">Logout</a>
+      </div>
+    </div>`;
+  }
+  return `<div class="nav">
+    <a class="nav-brand" href="/"><div class="nav-logo">🤖</div><div class="nav-name">Spyro Bot</div></a>
+    <div class="nav-links">
+      <a class="nav-link" href="/login">Login</a>
+      <a class="nav-link btn" href="/signup">Get Started</a>
+    </div>
+  </div>`;
+}
+
+function landing() {
+  return `${nav()}
+  <div class="container">
+    <div class="hero">
+      <h1>Link WhatsApp with <span>Spyro Bot</span></h1>
+      <p>The most powerful WhatsApp bot platform. 128+ commands, free AI image generation, anti-delete, group management, and more — all controllable from your browser.</p>
+      <div class="hero-cta">
+        <a href="/signup" class="btn btn-primary">🚀 Get Started Free</a>
+        <a href="/login" class="btn btn-secondary">Login</a>
+      </div>
+    </div>
+    <div class="features">
+      <div class="feature"><div class="feature-icon">🤖</div><h3>128+ Commands</h3><p>Ping, menu, stickers, polls, AI chat, image generation, and dozens more.</p></div>
+      <div class="feature"><div class="feature-icon">🎨</div><h3>Free AI Images</h3><p>Generate images with Pollinations AI — no API key needed, completely free.</p></div>
+      <div class="feature"><div class="feature-icon">🗑️</div><h3>Anti-Delete</h3><p>Automatically recover deleted messages. Never miss what someone tried to hide.</p></div>
+      <div class="feature"><div class="feature-icon">🛡️</div><h3>Group Protection</h3><p>Anti-link, anti-spam, anti-flood, welcome messages, warnings, and more.</p></div>
+      <div class="feature"><div class="feature-icon">⚡</div><h3>Auto Features</h3><p>Auto-typing, auto-read, always-online, auto-status-react — all toggleable.</p></div>
+      <div class="feature"><div class="feature-icon">🎭</div><h3>AI Personalities</h3><p>10 preset AI modes: troll, pirate, robot, guru, poet, detective, and more.</p></div>
+      <div class="feature"><div class="feature-icon">👻</div><h3>Ghost Mode</h3><p>Silently ignore annoying users without them knowing.</p></div>
+      <div class="feature"><div class="feature-icon">📊</div><h3>Dashboard</h3><p>Full control panel — pair via QR or phone code, manage features, view stats.</p></div>
+    </div>
+    <div class="footer">Spyro Bot · <a href="https://whatsapp.com/channel/0029VbEOdMr1yT2AiD35eK2F" target="_blank">Join WhatsApp Channel</a></div>
+  </div>`;
+}
+
+function loginPage() {
+  return `${nav()}
+  <div class="container">
+    <div class="auth-page card"><div class="card-pad">
+      <div class="auth-title">Welcome Back</div>
+      <div class="auth-sub">Login to manage your WhatsApp bot</div>
+      <div class="form-error" id="err"></div>
+      <form id="loginForm">
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="email" required placeholder="you@example.com" /></div>
+        <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" id="password" required placeholder="••••••••" /></div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Login</button>
+      </form>
+      <div class="auth-switch">Don't have an account? <a href="/signup">Sign up</a></div>
+    </div></div>
+  </div>`;
+}
+
+function signupPage() {
+  return `${nav()}
+  <div class="container">
+    <div class="auth-page card"><div class="card-pad">
+      <div class="auth-title">Create Account</div>
+      <div class="auth-sub">Get your own WhatsApp bot in 60 seconds</div>
+      <div class="form-error" id="err"></div>
+      <form id="signupForm">
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="email" required placeholder="you@example.com" /></div>
+        <div class="form-group"><label class="form-label">Phone (international format)</label><input class="form-input" type="tel" id="phone" placeholder="2547XXXXXXXX" /></div>
+        <div class="form-group"><label class="form-label">Password (min 6 chars)</label><input class="form-input" type="password" id="password" required placeholder="••••••••" /></div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Create Account</button>
+      </form>
+      <div class="auth-switch">Already have an account? <a href="/login">Login</a></div>
+    </div></div>
+  </div>`;
+}
+
+// ─── Dashboard ───────────────────────────────────────────────────
+let dashState = { session: null, sse: null, pairTab: 'qr', pairCode: null };
+
+async function dashboard(user) {
+  app.innerHTML = `${nav(user)}
+  <div class="container">
+    <div class="section-title">📊 Dashboard</div>
+    <div class="dash-grid" id="dashStats"></div>
+    <div class="card" style="margin-bottom:16px"><div class="card-pad">
+      <div class="section-title">🔗 WhatsApp Connection</div>
+      <div id="connSection">Loading…</div>
+    </div></div>
+    <div class="card" style="margin-bottom:16px"><div class="card-pad">
+      <div class="section-title">📴 Away Mode & AI Reply</div>
+      <div class="section-sub">Control how the bot responds when you're offline</div>
+      <div id="awaySection">Loading…</div>
+    </div></div>
+    <div class="card" style="margin-bottom:16px"><div class="card-pad">
+      <div class="section-title">⚙️ Features</div>
+      <div class="section-sub">Toggle bot features (applies to your WhatsApp session)</div>
+      <div id="featuresSection">Loading…</div>
+    </div></div>
+    <div class="card" style="margin-bottom:16px"><div class="card-pad">
+      <div class="section-title">🔑 Account</div>
+      <div id="accountSection"></div>
+    </div></div>
+    <div class="footer">Spyro Bot v1.0.0 · <a href="/api/logout">Logout</a></div>
+  </div>`;
+
+  await loadDashboardData(user);
+  connectSSE(user);
+}
+
+async function loadDashboardData(user) {
+  try {
+    const data = await api('/api/session/status');
+    dashState.session = data;
+    renderStats(user, data);
+    renderConnection(data);
+    renderAwayMode();
+    renderFeatures(data);
+    renderAccount(user);
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+function renderStats(user, data) {
+  $('#dashStats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Status</div><div class="stat-value"><span class="status-badge ${data.status||'inactive'}"><span class="status-dot"></span>${data.status||'inactive'}</span></div></div>
+    <div class="stat-card"><div class="stat-label">Bot Number</div><div class="stat-value">${data.botJid ? data.botJid.split('@')[0] : '—'}</div></div>
+  `;
+}
+
+function renderConnection(data) {
+  const status = data.status || 'inactive';
+  let html = `<div style="margin-bottom:12px"><span class="status-badge ${status}"><span class="status-dot"></span>${status}</span></div>`;
+  if (status === 'connected') {
+    html += `<div class="section-sub">Bot is connected as <strong>${data.pushName||'—'}</strong> (${data.botJid||'—'})</div>`;
+    html += `<button class="btn btn-danger" id="disconnectBtn">Disconnect</button> `;
+    html += `<button class="btn btn-secondary" id="reconnectBtn">Reconnect</button>`;
+  } else if (status === 'inactive') {
+    html += `<div class="section-sub">Connect your WhatsApp to get started. Choose a method below.</div>`;
+    html += `<div class="pair-tabs"><button class="pair-tab active" data-tab="qr">QR Code</button><button class="pair-tab" data-tab="phone">Phone Pairing</button></div>`;
+    html += `<div id="pairContent"></div>`;
+    html += `<button class="btn btn-primary" id="startBtn" style="margin-top:12px">Start Connection</button>`;
+  } else {
+    html += `<div class="section-sub">Status: ${status}</div>`;
+    html += `<div class="pair-tabs"><button class="pair-tab active" data-tab="qr">QR Code</button><button class="pair-tab" data-tab="phone">Phone Pairing</button></div>`;
+    html += `<div id="pairContent"></div>`;
+  }
+  $('#connSection').innerHTML = html;
+  // Wire up tabs
+  document.querySelectorAll('.pair-tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.pair-tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      dashState.pairTab = t.dataset.tab;
+      renderPairContent();
+    });
+  });
+  const startBtn = $('#startBtn');
+  if (startBtn) startBtn.addEventListener('click', async () => {
+    try { await api('/api/session/start', { method: 'POST' }); showToast('Starting session…'); }
+    catch (e) { showToast(e.message, 'error'); }
+  });
+  const dcBtn = $('#disconnectBtn');
+  if (dcBtn) dcBtn.addEventListener('click', async () => {
+    try { await api('/api/session/stop', { method: 'POST' }); showToast('Disconnected'); loadDashboardData(user); }
+    catch (e) { showToast(e.message, 'error'); }
+  });
+  const rcBtn = $('#reconnectBtn');
+  if (rcBtn) rcBtn.addEventListener('click', async () => {
+    try { await api('/api/session/reconnect', { method: 'POST' }); showToast('Reconnecting…'); }
+    catch (e) { showToast(e.message, 'error'); }
+  });
+  renderPairContent();
+}
+
+function renderPairContent() {
+  const el = $('#pairContent');
+  if (!el) return;
+  if (dashState.pairTab === 'qr') {
+    const s = dashState.session;
+    if (s?.hasQr) {
+      el.innerHTML = `<div class="qr-box"><img src="/api/session/qr?t=${Date.now()}" alt="QR Code" /></div><div style="text-align:center;font-size:12px;color:var(--text-dim)">QR refreshes automatically</div>`;
+    } else {
+      el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-dim)">QR will appear here once the session starts.</div>`;
+    }
+  } else {
+    el.innerHTML = `
+      <div class="form-group"><label class="form-label">Your WhatsApp phone number</label><input class="form-input" type="tel" id="pairPhone" placeholder="2547XXXXXXXX" /></div>
+      <button class="btn btn-primary" id="getPairCode">Get Pairing Code</button>
+      <div id="pairCodeResult"></div>`;
+    $('#getPairCode').addEventListener('click', async () => {
+      const phone = $('#pairPhone').value.trim();
+      if (!phone) return showToast('Enter your phone number', 'error');
+      try {
+        $('#getPairCode').textContent = 'Getting…'; $('#getPairCode').disabled = true;
+        const res = await api('/api/session/pair', { method: 'POST', body: JSON.stringify({ phone }) });
+        $('#pairCodeResult').innerHTML = `<div class="pair-code-box"><div style="font-size:12px;color:var(--text-dim);margin-bottom:8px">YOUR PAIRING CODE</div><div class="pair-code">${res.code}</div><div style="font-size:12px;color:var(--text-dim);margin-top:8px">Enter in WhatsApp → Settings → Linked Devices → Link with phone number</div></div>`;
+      } catch (e) { showToast(e.message, 'error'); }
+      finally { $('#getPairCode').textContent = 'Get Pairing Code'; $('#getPairCode').disabled = false; }
+    });
+  }
+}
+
+// ─── Away Mode rendering ────────────────────────────────────────
+async function renderAwayMode() {
+  try {
+    const away = await api('/api/away');
+    const mode = away.mode || 'off';
+    const modeLabels = { off: 'Silent', ai: 'AI Auto-Reply', away: 'Custom Away Message' };
+    $('#awaySection').innerHTML = `
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="btn ${mode==='off'?'btn-primary':'btn-secondary'}" data-mode="off" style="flex:1;justify-content:center;font-size:12px">🔇 Silent</button>
+        <button class="btn ${mode==='ai'?'btn-primary':'btn-secondary'}" data-mode="ai" style="flex:1;justify-content:center;font-size:12px">🤖 AI Reply</button>
+        <button class="btn ${mode==='away'?'btn-primary':'btn-secondary'}" data-mode="away" style="flex:1;justify-content:center;font-size:12px">📴 Away Msg</button>
+      </div>
+      <div style="padding:10px 14px;background:rgba(0,0,0,0.2);border-radius:8px;margin-bottom:12px;font-size:13px">
+        <strong>Current:</strong> ${modeLabels[mode] || mode}<br>
+        <strong>Last active:</strong> ${away.lastActiveAgo || 'never'}<br>
+        <strong>Status:</strong> ${away.isOnline ? '🟢 Online' : '🔴 Offline'}
+      </div>
+      <div class="form-group">
+        <label class="form-label">Custom Away Message (used when "Away Msg" mode is on)</label>
+        <textarea class="form-input" id="awayMsg" rows="3" placeholder="Hey! 👋 The owner is currently away and can't respond right now. They'll get back to you soon. — Spyro Bot 🤖">${away.message || ''}</textarea>
+      </div>
+      <button class="btn btn-primary" id="saveAway" style="width:100%;justify-content:center">💾 Save Away Message</button>
+      <div style="margin-top:12px;font-size:12px;color:var(--text-dim)">
+        <strong>How it works:</strong><br>
+        • <strong>Silent</strong> — Bot only responds to commands (.ping, .menu, etc.)<br>
+        • <strong>AI Reply</strong> — Bot replies to all messages using your trained AI personality<br>
+        • <strong>Away Msg</strong> — Bot sends your custom away message (once per 30 min per user)<br>
+        Train your AI at <a href="/train" style="color:var(--green)">🧠 Train AI</a> page
+      </div>`;
+    // Wire up mode buttons
+    document.querySelectorAll('#awaySection [data-mode]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try {
+          const msg = $('#awayMsg').value;
+          await api('/api/away', { method: 'POST', body: JSON.stringify({ mode: btn.dataset.mode, message: msg }) });
+          showToast(`Mode: ${btn.dataset.mode.toUpperCase()}`, 'success');
+          renderAwayMode();
+        } catch (e) { showToast(e.message, 'error'); }
+      });
+    });
+    $('#saveAway').addEventListener('click', async () => {
+      try {
+        await api('/api/away', { method: 'POST', body: JSON.stringify({ message: $('#awayMsg').value }) });
+        showToast('Away message saved!', 'success');
+      } catch (e) { showToast(e.message, 'error'); }
+    });
+  } catch (err) {
+    $('#awaySection').innerHTML = '<div style="color:var(--text-dim)">Failed to load away mode settings.</div>';
+  }
+}
+
+function renderFeatures(data) {
+  const feats = data.features || {};
+  const items = [
+    { key: 'autotyping', label: 'Auto-Typing', icon: '⌨️' },
+    { key: 'autoread', label: 'Auto-Read', icon: '📖' },
+    { key: 'alwaysonline', label: 'Always Online', icon: '🟢' },
+    { key: 'autostatusview', label: 'Auto-Status-View', icon: '👁️' },
+    { key: 'autostatusreact', label: 'Auto-Status-React', icon: '😍' },
+    { key: 'antidelete', label: 'Anti-Delete', icon: '🗑️' },
+  ];
+  $('#featuresSection').innerHTML = items.map(f => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--card-border)">
+      <span>${f.icon} ${f.label}</span>
+      <label style="position:relative;display:inline-block;width:40px;height:22px">
+        <input type="checkbox" id="feat_${f.key}" ${feats[f.key]?'checked':''} style="opacity:0;width:0;height:0">
+        <span style="position:absolute;cursor:pointer;inset:0;background:${feats[f.key]?'var(--green)':'rgba(255,255,255,0.1)'};border-radius:22px;transition:0.3s"></span>
+        <span style="position:absolute;height:16px;width:16px;left:${feats[f.key]?'22px':'4px'};bottom:3px;background:#fff;border-radius:50%;transition:0.3s"></span>
+      </label>
+    </div>
+  `).join('');
+  items.forEach(f => {
+    $('#feat_' + f.key).addEventListener('change', async (e) => {
+      try { await api('/api/session/feature', { method: 'POST', body: JSON.stringify({ feature: f.key, on: e.target.checked }) }); showToast(`${f.label} ${e.target.checked?'ON':'OFF'}`, 'success'); }
+      catch (err) { showToast(err.message, 'error'); e.target.checked = !e.target.checked; }
+      // Re-render the toggle visual
+      renderFeatures(await api('/api/session/status').catch(()=>({})));
+    });
+  });
+}
+
+function renderAccount(user) {
+  $('#accountSection').innerHTML = `
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div><div class="stat-label">Email</div><div>${user.email}</div></div>
+      <div><div class="stat-label">Phone</div><div>${user.phone||'—'}</div></div>
+      <div><div class="stat-label">Role</div><div><span class="role-badge ${user.role}">${user.role}</span></div></div>
+    </div>
+    <div style="margin-top:16px">
+      <button class="btn btn-secondary" id="changePassBtn">Change Password</button>
+    </div>`;
+  $('#changePassBtn').addEventListener('click', () => {
+    const old = prompt('Current password:');
+    if (!old) return;
+    const nw = prompt('New password (min 6 chars):');
+    if (!nw) return;
+    api('/api/account/password', { method: 'POST', body: JSON.stringify({ oldPassword: old, newPassword: nw }) })
+      .then(() => showToast('Password changed', 'success'))
+      .catch(e => showToast(e.message, 'error'));
+  });
+}
+
+function connectSSE(user) {
+  if (dashState.sse) dashState.sse.close();
+  dashState.sse = new EventSource('/api/session/events');
+  dashState.sse.addEventListener('qr', (e) => {
+    const data = JSON.parse(e.data);
+    dashState.session = dashState.session || {};
+    dashState.session.hasQr = true;
+    dashState.session.status = 'qr_ready';
+    renderConnection(dashState.session);
+  });
+  dashState.sse.addEventListener('open', (e) => {
+    const data = JSON.parse(e.data);
+    showToast('🎉 WhatsApp connected!', 'success');
+    loadDashboardData(user);
+  });
+  dashState.sse.addEventListener('close', () => { loadDashboardData(user); });
+  dashState.sse.addEventListener('connecting', () => { loadDashboardData(user); });
+  dashState.sse.addEventListener('pairing_code', (e) => {
+    const data = JSON.parse(e.data);
+    const el = $('#pairCodeResult');
+    if (el) {
+      el.innerHTML = `<div class="pair-code-box"><div style="font-size:12px;color:var(--text-dim);margin-bottom:8px">YOUR PAIRING CODE</div><div class="pair-code">${data.code}</div></div>`;
+    }
+  });
+}
+
+// ─── Admin Panel ─────────────────────────────────────────────────
+async function adminPanel(user) {
+  app.innerHTML = `${nav(user)}
+  <div class="container">
+    <div class="section-title">👑 Admin Panel</div>
+    <div class="dash-grid" id="adminStats"></div>
+    <div class="card" style="margin-bottom:16px"><div class="card-pad">
+      <div class="section-title">👥 Users</div>
+      <div id="usersTable">Loading…</div>
+    </div></div>
+    <div class="card" style="margin-bottom:16px"><div class="card-pad">
+      <div class="section-title">🔗 Active Sessions</div>
+      <div id="sessionsList">Loading…</div>
+    </div></div>
+    <div class="footer">Spyro Bot Admin · <a href="/api/logout">Logout</a></div>
+  </div>`;
+  await loadAdminData();
+}
+
+async function loadAdminData() {
+  try {
+    const [stats, users, sessions] = await Promise.all([
+      api('/api/admin/stats'),
+      api('/api/admin/users'),
+      api('/api/admin/sessions'),
+    ]);
+    $('#adminStats').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value">${stats.users}</div></div>
+      <div class="stat-card"><div class="stat-label">Active Sessions</div><div class="stat-value">${stats.activeSessions}</div></div>
+    `;
+    $('#usersTable').innerHTML = `
+      <table class="table"><thead><tr><th>ID</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+      ${users.map(u => `<tr>
+        <td>${u.id}</td><td>${u.email}</td><td>${u.phone||'—'}</td>
+        <td><span class="role-badge ${u.role}">${u.role}</span></td>
+        <td>${u.banned?'<span style="color:var(--red)">Banned</span>':'Active'}</td>
+        <td>${u.role!=='admin'?(u.banned?`<button class="btn btn-secondary" onclick="unbanUser(${u.id})">Unban</button>`:`<button class="btn btn-danger" onclick="banUser(${u.id})">Ban</button>`):''}</td>
+      </tr>`).join('')}
+      </tbody></table>`;
+    $('#sessionsList').innerHTML = sessions.length
+      ? sessions.map(s => `<div style="padding:8px 0;border-bottom:1px solid var(--card-border)">User #${s.userId}: ${s.status} ${s.user?s.user:''}</div>`).join('')
+      : '<div style="color:var(--text-dim)">No active sessions</div>';
+  } catch (err) { showToast(err.message, 'error'); }
+}
+
+window.banUser = async (id) => { try { await api(`/api/admin/users/${id}/ban`, { method: 'POST' }); showToast('User banned'); loadAdminData(); } catch(e){ showToast(e.message,'error'); } };
+window.unbanUser = async (id) => { try { await api(`/api/admin/users/${id}/unban`, { method: 'POST' }); showToast('User unbanned'); loadAdminData(); } catch(e){ showToast(e.message,'error'); } };
+
+// ─── AI Training Page ────────────────────────────────────────────
+async function trainingPage(user) {
+  app.innerHTML = `${nav(user)}
+  <div class="container">
+    <div class="section-title">🧠 AI Training</div>
+    <div class="section-sub">Train your bot to reply in your own personality. When you're offline, the bot will reply to messages as if it were you.</div>
+
+    <div class="card" style="margin-bottom:16px"><div class="card-pad">
+      <div class="section-title">👤 Character</div>
+      <div class="form-group"><label class="form-label">Character Name (what the bot calls itself)</label><input class="form-input" id="charName" placeholder="e.g. Mesh, Spyro, Dr. Cool" /></div>
+      <div class="form-group"><label class="form-label">Personality Description</label><textarea class="form-input" id="personality" rows="3" placeholder="e.g. Friendly, sarcastic, loves coffee, always makes jokes, speaks casually with slang"></textarea></div>
+      <div class="form-group"><label class="form-label">Emotions (how the bot feels and reacts)</label><textarea class="form-input" id="emotions" rows="2" placeholder="e.g. Gets excited when talking about tech, gets annoyed by spam, is warm and caring with friends"></textarea></div>
+      <div class="form-group"><label class="form-label">Speaking Style</label><textarea class="form-input" id="speakingStyle" rows="2" placeholder="e.g. Uses emojis a lot, short replies, types in lowercase, uses 'haha' instead of 'lol'"></textarea></div>
+    </div></div>
+
+    <div class="card" style="margin-bottom:16px"><div class="card-pad">
+      <div class="section-title">💬 Example Conversations</div>
+      <div class="section-sub">Teach the bot how to reply. Add examples of what someone might say, and how you'd reply.</div>
+      <div id="examplesList"></div>
+      <button class="btn btn-secondary" id="addExample" style="margin-top:12px">+ Add Example</button>
+    </div></div>
+
+    <div class="card" style="margin-bottom:16px"><div class="card-pad">
+      <div class="section-title">⚙️ Settings</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0">
+        <div><strong>Auto-reply when offline</strong><br><span style="font-size:12px;color:var(--text-dim)">Bot replies to messages on your behalf when you're not available</span></div>
+        <label style="position:relative;display:inline-block;width:40px;height:22px">
+          <input type="checkbox" id="autoReplyOffline" style="opacity:0;width:0;height:0">
+          <span style="position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,0.1);border-radius:22px;transition:0.3s" id="offlineToggle"></span>
+          <span style="position:absolute;height:16px;width:16px;left:4px;bottom:3px;background:#fff;border-radius:50%;transition:0.3s" id="offlineKnob"></span>
+        </label>
+      </div>
+    </div></div>
+
+    <div class="card" style="margin-bottom:16px"><div class="card-pad">
+      <div class="section-title">🧪 Test Your AI</div>
+      <div class="section-sub">Send a test message to see how your trained bot replies</div>
+      <div style="display:flex;gap:8px"><input class="form-input" id="testInput" placeholder="Type a test message..." /><button class="btn btn-primary" id="testBtn">Test</button></div>
+      <div id="testResult" style="margin-top:12px"></div>
+    </div></div>
+
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="btn btn-primary" id="saveBtn" style="flex:1;justify-content:center">💾 Save Training</button>
+      <a class="btn btn-secondary" href="/dashboard">← Back to Dashboard</a>
+    </div>
+    <div class="footer">Spyro Bot · <a href="https://whatsapp.com/channel/0029VbEOdMr1yT2AiD35eK2F" target="_blank">Join our WhatsApp Channel</a></div>
+  </div>`;
+  await loadTrainingData();
+}
+
+async function loadTrainingData() {
+  try {
+    const data = await api('/api/training');
+    $('#charName').value = data.character_name || '';
+    $('#personality').value = data.personality || '';
+    $('#emotions').value = data.emotions || '';
+    $('#speakingStyle').value = data.speaking_style || '';
+    renderExamples(data.example_pairs || []);
+    const offline = data.auto_reply_offline === 1;
+    $('#autoReplyOffline').checked = offline;
+    updateToggle('offlineToggle', 'offlineKnob', offline);
+  } catch (err) { showToast(err.message, 'error'); }
+  // Wire up
+  $('#addExample').addEventListener('click', () => addExampleRow('', ''));
+  $('#autoReplyOffline').addEventListener('change', (e) => updateToggle('offlineToggle', 'offlineKnob', e.target.checked));
+  $('#saveBtn').addEventListener('click', saveTraining);
+  $('#testBtn').addEventListener('click', testAi);
+}
+
+function updateToggle(toggleId, knobId, on) {
+  const t = document.getElementById(toggleId);
+  const k = document.getElementById(knobId);
+  if (!t || !k) return;
+  t.style.background = on ? 'var(--green)' : 'rgba(255,255,255,0.1)';
+  k.style.left = on ? '22px' : '4px';
+}
+
+function renderExamples(pairs) {
+  const list = $('#examplesList');
+  list.innerHTML = '';
+  if (!pairs || !pairs.length) {
+    addExampleRow('', '');
+    return;
+  }
+  pairs.forEach(p => addExampleRow(p.input || '', p.output || ''));
+}
+
+function addExampleRow(input, output) {
+  const list = $('#examplesList');
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:flex-start';
+  div.innerHTML = `
+    <input class="form-input ex-input" placeholder="Someone says..." value="${input.replace(/"/g,'&quot;')}" style="flex:1" />
+    <input class="form-input ex-output" placeholder="You reply..." value="${output.replace(/"/g,'&quot;')}" style="flex:1" />
+    <button class="btn btn-danger ex-remove" style="padding:12px">✕</button>`;
+  div.querySelector('.ex-remove').addEventListener('click', () => div.remove());
+  list.appendChild(div);
+}
+
+async function saveTraining() {
+  const data = {
+    character_name: $('#charName').value,
+    personality: $('#personality').value,
+    emotions: $('#emotions').value,
+    speaking_style: $('#speakingStyle').value,
+    example_pairs: [],
+    auto_reply_offline: $('#autoReplyOffline').checked,
+  };
+  document.querySelectorAll('#examplesList > div').forEach(d => {
+    const i = d.querySelector('.ex-input').value.trim();
+    const o = d.querySelector('.ex-output').value.trim();
+    if (i && o) data.example_pairs.push({ input: i, output: o });
+  });
+  try {
+    $('#saveBtn').textContent = 'Saving...'; $('#saveBtn').disabled = true;
+    await api('/api/training', { method: 'POST', body: JSON.stringify(data) });
+    showToast('Training saved!', 'success');
+  } catch (err) { showToast(err.message, 'error'); }
+  finally { $('#saveBtn').textContent = '💾 Save Training'; $('#saveBtn').disabled = false; }
+}
+
+async function testAi() {
+  const msg = $('#testInput').value.trim();
+  if (!msg) return;
+  $('#testBtn').textContent = 'Thinking...'; $('#testBtn').disabled = true;
+  $('#testResult').innerHTML = '<div style="color:var(--text-dim)">Generating reply...</div>';
+  try {
+    const res = await api('/api/training/test', { method: 'POST', body: JSON.stringify({ message: msg }) });
+    $('#testResult').innerHTML = `<div style="padding:14px;background:rgba(37,211,102,0.06);border:1px solid rgba(37,211,102,0.2);border-radius:10px"><strong>Bot replies:</strong><br><br>${res.reply}</div>`;
+  } catch (err) { showToast(err.message, 'error'); }
+  finally { $('#testBtn').textContent = 'Test'; $('#testBtn').disabled = false; }
+}
+
+// ─── Init ────────────────────────────────────────────────────────
+async function init() {
+  const path = window.location.pathname;
+  // Check if logged in
+  let user = null;
+  try { user = await api('/api/me'); } catch {}
+  if (path === '/' && !user) { app.innerHTML = landing(); return; }
+  if (path === '/' && user) { window.location.href = '/dashboard'; return; }
+  if (path === '/login') {
+    if (user) { window.location.href = '/dashboard'; return; }
+    app.innerHTML = loginPage();
+    $('#loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await api('/api/login', { method: 'POST', body: JSON.stringify({ email: $('#email').value, password: $('#password').value }) });
+        window.location.href = '/dashboard';
+      } catch (err) { $('#err').textContent = err.message; $('#err').classList.add('show'); }
+    });
+    return;
+  }
+  if (path === '/signup') {
+    if (user) { window.location.href = '/dashboard'; return; }
+    app.innerHTML = signupPage();
+    $('#signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await api('/api/signup', { method: 'POST', body: JSON.stringify({ email: $('#email').value, phone: $('#phone').value, password: $('#password').value }) });
+        window.location.href = '/dashboard';
+      } catch (err) { $('#err').textContent = err.message; $('#err').classList.add('show'); }
+    });
+    return;
+  }
+  if (path === '/dashboard') { if (!user) { window.location.href = '/login'; return; } await dashboard(user); return; }
+  if (path === '/train') { if (!user) { window.location.href = '/login'; return; } await trainingPage(user); return; }
+  if (path === '/admin') { if (!user || user.role !== 'admin') { window.location.href = '/dashboard'; return; } await adminPanel(user); return; }
+  // 404
+  app.innerHTML = landing();
+}
+init();
+</script>
+</body>
+</html>

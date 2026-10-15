@@ -1,0 +1,45 @@
+# Koyeb deployment config
+# Docs: https://www.koyeb.com/docs/deploy-with-koyeb-yaml
+#
+# Deploy via CLI:
+#   koyeb app deploy --git github.com/<you>/<repo>
+# Or via dashboard: connect your GitHub repo and Koyeb auto-detects this file.
+
+services:
+  - name: whatsapp-bot
+    # Use the Dockerfile in the repo root
+    type: web
+    docker:
+      dockerfile: Dockerfile
+    # Koyeb auto-assigns a public URL on port 80 -> your $PORT
+    ports:
+      - port: 3000
+        protocol: http
+    # Environment variables — set these in the Koyeb dashboard OR here.
+    # IMPORTANT: never commit real secrets to git; use Koyeb's secret management.
+    env:
+      - name: NODE_ENV
+        value: production
+      - name: PORT
+        value: "3000"
+      - name: HOST
+        value: 0.0.0.0
+      - name: LOG_PRETTY
+        value: "false"
+      # Set these as encrypted secrets in Koyeb dashboard:
+      #   BOT_NAME, BOT_PREFIX, OWNER_JID, LOG_LEVEL, ENABLE_AI, OPENAI_API_KEY
+    # Resources — free tier: 512MB RAM, 0.1 vCPU
+    resources:
+      memory: 512
+      cpu: 0.1
+    # Healthcheck
+    health:
+      http:
+        path: /health
+        port: 3000
+    # Auto-scaling (free tier: min=0, max=1 for sleeping)
+    scaling:
+      min: 1
+      max: 1
+    regions:
+      - fra  # Frankfurt — change to your preferred region
